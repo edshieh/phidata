@@ -16,6 +16,7 @@ from llama_index.core import (
 )
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core.node_parser import SentenceSplitter
+from phi.llm.groq import Groq
 
 
 data_dir = Path(__file__).parent.parent.parent.joinpath("wip", "data", "paul_graham")
@@ -42,7 +43,7 @@ nodes = splitter.get_nodes_from_documents(documents)
 
 storage_context = StorageContext.from_defaults()
 
-index = VectorStoreIndex(nodes=nodes, storage_context=storage_context)
+index = VectorStoreIndex(nodes=nodes, storage_context=storage_context, embed_model='local:BAAI/bge-small-en-v1.5')
 
 retriever = VectorIndexRetriever(index)
 
@@ -50,7 +51,7 @@ retriever = VectorIndexRetriever(index)
 knowledge_base = LlamaIndexKnowledgeBase(retriever=retriever)
 
 # Create an assistant with the knowledge base
-assistant = Assistant(knowledge_base=knowledge_base, search_knowledge=True, debug_mode=True, show_tool_calls=True)
+assistant = Assistant(llm=Groq(model="llama3-70b-8192"), knowledge_base=knowledge_base, search_knowledge=True, debug_mode=True, show_tool_calls=True)
 
 # Use the assistant to ask a question and print a response.
-assistant.print_response("Explain what this text means: low end eats the high end", markdown=True)
+assistant.print_response("Explain what this text means: low end eats the high end", markdown=True, stream=False)
